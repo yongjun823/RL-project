@@ -57,18 +57,17 @@ class DriveDataLoader(data.Dataset):
         right_img = img_road(target_data['img_arr'][2])
 
         tensors = torch.cat((center_img, left_img, right_img), 0)
-        car_tensors = torch.from_numpy(np.array(target_data['car_arr']))
+        car_tensors = torch.from_numpy(np.array(target_data['car_arr'], dtype=np.float32))
         return tensors, car_tensors
 
     def __len__(self):
         return len(self.drive_data)
 
-
-custom_dataset = DriveDataLoader()
-train_loader = torch.utils.data.DataLoader(dataset=custom_dataset,
-                                           batch_size=100,
-                                           shuffle=True)
-
-for image, label in train_loader:
-    print(label.shape)
-    print(image.shape)
+# custom_dataset = DriveDataLoader()
+# train_loader = torch.utils.data.DataLoader(dataset=custom_dataset,
+#                                            batch_size=100,
+#                                            shuffle=True)
+#
+# for image, label in train_loader:
+#     print(label.shape)
+#     print(image.shape)
