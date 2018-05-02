@@ -11,11 +11,15 @@ from PIL import Image
 from flask import Flask
 from io import BytesIO
 from udacity_car.data_loader import pre_process
+import torch
+from torch.autograd import Variable
+from udacity_car.data_loader import img_road_path
 
 sio = socketio.Server()
 app = Flask(__name__)
-model = None
 prev_image_array = None
+
+model = torch.load('model.pkl')
 
 
 class SimplePIController:
@@ -57,14 +61,18 @@ def telemetry(sid, data):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         tensor_img = pre_process(image)
+        tensor_img.unsqueeze_(0)
+        tt = Variable(tensor_img)
 
-        print(tensor_img)
+        if torch.cuda.is_available():
+            tt = tt.cuda()
 
-        # steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
+        output = model(tt).cpu().data[0]
 
-        # throttle = controller.update(float(speed))
+        steering_angle = output[0]
+        throttle = str(output[1])
 
-        throttle = str(float(throttle) + 0.05)
+        print(steering_angle, throttle)
 
         send_control(steering_angle, throttle)
 

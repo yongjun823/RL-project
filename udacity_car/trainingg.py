@@ -3,54 +3,17 @@ import torch.nn as nn
 from torch.autograd import Variable
 import os
 from udacity_car.data_loader import DriveDataLoader
-import torch.functional as f
+from udacity_car.model import CnnNet
 
 # Hyper Parameters
-num_epochs = 5
-batch_size = 100
+num_epochs = 20
+batch_size = 200
 learning_rate = 0.001
 
 drive_dataset = DriveDataLoader()
 train_loader = torch.utils.data.DataLoader(dataset=drive_dataset,
-                                           batch_size=200,
+                                           batch_size=batch_size,
                                            shuffle=True)
-
-
-class CnnNet(nn.Module):
-    def __init__(self):
-        super(CnnNet, self).__init__()
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=5, padding=2),
-            nn.BatchNorm2d(16),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(16, 32, kernel_size=5, padding=2),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=5, padding=2),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-        self.fc1 = nn.Linear(12 * 12 * 64, 12 * 12)
-        self.fc2 = nn.Linear(12 * 12, 12)
-        self.fc3 = nn.Linear(12, 3)
-
-    def forward(self, x):
-        out = self.layer1(x)
-        out = self.layer2(out)
-        out = self.layer3(out)
-
-        out = out.view(out.size(0), -1)
-
-        out = nn.ReLU(self.fc1(out))
-        out = nn.ReLU(self.fc2(out))
-        out = torch.sigmoid(self.fc3(out))
-
-        return out
-
 
 cnn_net = CnnNet()
 
