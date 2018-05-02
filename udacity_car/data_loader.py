@@ -12,26 +12,32 @@ import numpy as np
 import csv
 from PIL import Image
 
-csv_path = 'D:\\tmp\\beta_simulator_windows\\R\\driving_log.csv'
-
+csv_path = 'D:\\tmp\\beta_simulator_windows\\R2\\driving_log.csv'
 normalize = transforms.Normalize(
     mean=[0.485, 0.456, 0.406],
     std=[0.229, 0.224, 0.225]
 )
 
 pre_process = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
+    transforms.Resize(128),
+    transforms.CenterCrop(100),
     transforms.ToTensor(),
     normalize
 ])
 
 
-def img_road(img_path):
-    im = Image.open(img_path)
-    img = pre_process(im)
+def img_road_path(img_paths):
+    img_tensors = []
 
-    return img
+    for img_path in img_paths:
+        im = Image.open(img_path)
+        img = pre_process(im)
+
+        img_tensors.append(img)
+
+    tensors = torch.cat(img_tensors, 0)
+
+    return tensors
 
 
 class DriveDataLoader(data.Dataset):
@@ -43,7 +49,8 @@ class DriveDataLoader(data.Dataset):
 
         for row in csv_reader:
             self.drive_data.append({
-                'img_arr': [row[0], row[1], row[2]],
+                # 'img_arr': [row[0], row[1], row[2]],
+                'img_arr': [row[0]],
                 'car_arr': [float(x) for x in [row[3], row[4], row[5]]]
             })
 
@@ -52,11 +59,7 @@ class DriveDataLoader(data.Dataset):
     def __getitem__(self, index):
         target_data = self.drive_data[index]
 
-        center_img = img_road(target_data['img_arr'][0])
-        left_img = img_road(target_data['img_arr'][1])
-        right_img = img_road(target_data['img_arr'][2])
-
-        tensors = torch.cat((center_img, left_img, right_img), 0)
+        tensors = img_road_path(target_data['img_arr'])
         car_tensors = torch.from_numpy(np.array(target_data['car_arr'], dtype=np.float32))
         return tensors, car_tensors
 

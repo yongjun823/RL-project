@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
-import torchvision.datasets as dsets
-import torchvision.transforms as transforms
 from torch.autograd import Variable
 import os
 from udacity_car.data_loader import DriveDataLoader
+import torch.functional as f
 
 # Hyper Parameters
 num_epochs = 5
@@ -13,7 +12,7 @@ learning_rate = 0.001
 
 drive_dataset = DriveDataLoader()
 train_loader = torch.utils.data.DataLoader(dataset=drive_dataset,
-                                           batch_size=50,
+                                           batch_size=200,
                                            shuffle=True)
 
 
@@ -21,7 +20,7 @@ class CnnNet(nn.Module):
     def __init__(self):
         super(CnnNet, self).__init__()
         self.layer1 = nn.Sequential(
-            nn.Conv2d(9, 16, kernel_size=5, padding=2),
+            nn.Conv2d(3, 16, kernel_size=5, padding=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
             nn.MaxPool2d(2))
@@ -35,14 +34,21 @@ class CnnNet(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(2))
-        self.fc = nn.Linear(28 * 28 * 64, 3)
+        self.fc1 = nn.Linear(12 * 12 * 64, 12 * 12)
+        self.fc2 = nn.Linear(12 * 12, 12)
+        self.fc3 = nn.Linear(12, 3)
 
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
         out = self.layer3(out)
+
         out = out.view(out.size(0), -1)
-        out = self.fc(out)
+
+        out = nn.ReLU(self.fc1(out))
+        out = nn.ReLU(self.fc2(out))
+        out = torch.sigmoid(self.fc3(out))
+
         return out
 
 
@@ -53,6 +59,7 @@ if 'model.pkl' in os.listdir('./'):
     cnn_net = torch.load('model.pkl')
 
 if torch.cuda.is_available():
+    print('cuda start')
     cnn_net.cuda()
 
 criterion = nn.MSELoss()
