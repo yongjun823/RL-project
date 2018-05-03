@@ -3,7 +3,6 @@ import base64
 from datetime import datetime
 import os
 
-import numpy as np
 import socketio
 import eventlet
 import eventlet.wsgi
@@ -13,13 +12,12 @@ from io import BytesIO
 from udacity_car.data_loader import pre_process
 import torch
 from torch.autograd import Variable
-from udacity_car.data_loader import img_road_path
 
 sio = socketio.Server()
 app = Flask(__name__)
 prev_image_array = None
 
-model = torch.load('model.pkl')
+model = torch.load('mode1l.pkl')
 
 
 class SimplePIController:
@@ -70,7 +68,7 @@ def telemetry(sid, data):
         output = model(tt).cpu().data[0]
 
         steering_angle = output[0]
-        throttle = str(output[1])
+        throttle = str(output[1] / 10)
 
         print(steering_angle, throttle)
 

@@ -8,7 +8,7 @@ from udacity_car.model import CnnNet
 # Hyper Parameters
 num_epochs = 20
 batch_size = 200
-learning_rate = 0.001
+learning_rate = 0.0001
 
 drive_dataset = DriveDataLoader()
 train_loader = torch.utils.data.DataLoader(dataset=drive_dataset,
@@ -17,9 +17,9 @@ train_loader = torch.utils.data.DataLoader(dataset=drive_dataset,
 
 cnn_net = CnnNet()
 
-if 'model.pkl' in os.listdir('./'):
+if 'mode1l.pkl' in os.listdir('./'):
     print('model load!!')
-    cnn_net = torch.load('model.pkl')
+    cnn_net = torch.load('mode1l.pkl')
 
 if torch.cuda.is_available():
     print('cuda start')
@@ -45,4 +45,4 @@ for epoch in range(num_epochs):
             print('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f'
                   % (epoch + 1, num_epochs, i + 1, len(drive_dataset) // batch_size, loss.data[0]))
 
-    torch.save(cnn_net, 'model.pkl')
+    torch.save(cnn_net, 'mode1l.pkl')
