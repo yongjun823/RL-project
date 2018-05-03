@@ -20,9 +20,8 @@ class CnnNet(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(2))
-        self.fc1 = nn.Linear(12 * 12 * 64, 12 * 12)
-        self.fc2 = nn.Linear(12 * 12, 12)
-        self.fc3 = nn.Linear(12, 3)
+        self.fc1 = nn.Linear(12 * 12 * 64, 12)
+        self.fc2 = nn.Linear(12, 3)
 
     def forward(self, x):
         out = self.layer1(x)
@@ -31,8 +30,7 @@ class CnnNet(nn.Module):
 
         out = out.view(out.size(0), -1)
 
-        out = f.relu(self.fc1(out))
-        out = f.relu(self.fc2(out))
-        out = f.tanh(self.fc3(out))
+        out = self.fc1(out)
+        out = f.tanh(self.fc2(out))
 
         return out
