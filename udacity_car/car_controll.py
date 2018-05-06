@@ -1,4 +1,6 @@
 # https://github.com/udacity/CarND-Behavioral-Cloning-P3/blob/master/drive.py
+# Udacity Self-Driving Car Simlulator Controller
+# Use Pytorch
 import base64
 from datetime import datetime
 import os
@@ -46,6 +48,9 @@ set_speed = 9
 controller.set_desired(set_speed)
 
 
+# controll car
+# data : car data (steering_angle, throttle, speed, image)
+# image : only center image
 @sio.on('telemetry')
 def telemetry(sid, data):
     if data:
@@ -89,6 +94,7 @@ def connect(sid, environ):
     send_control(0, 0)
 
 
+# ToDo : send function (back data)
 def send_control(steering_angle, throttle):
     sio.emit(
         "steer",
