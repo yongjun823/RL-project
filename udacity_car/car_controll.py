@@ -17,7 +17,7 @@ sio = socketio.Server()
 app = Flask(__name__)
 prev_image_array = None
 
-model = torch.load('mode1l.pkl')
+model = torch.load('model.pkl')
 
 
 class SimplePIController:
@@ -59,6 +59,8 @@ def telemetry(sid, data):
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
         tensor_img = pre_process(image)
+
+        tensor_img = torch.cat([tensor_img, tensor_img, tensor_img])
         tensor_img.unsqueeze_(0)
         tt = Variable(tensor_img)
 
@@ -68,11 +70,12 @@ def telemetry(sid, data):
         output = model(tt).cpu().data[0]
 
         steering_angle = output[0]
-        throttle = str(output[1] / 10)
+        throttle = output[1]
+        brake = output[2]
 
-        print(steering_angle, throttle)
+        print(steering_angle, throttle, brake)
 
-        send_control(steering_angle, throttle)
+        send_control(steering_angle, throttle, brake)
 
         # save frame
         # timestamp = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
@@ -86,15 +89,16 @@ def telemetry(sid, data):
 @sio.on('connect')
 def connect(sid, environ):
     print("connect ", sid)
-    send_control(0, 0)
+    send_control(0, 0, 0)
 
 
-def send_control(steering_angle, throttle):
+def send_control(steering_angle, throttle, brake):
     sio.emit(
         "steer",
         data={
             'steering_angle': steering_angle.__str__(),
-            'throttle': throttle.__str__()
+            'throttle': throttle.__str__(),
+            # 'brake': brake.__str__()
         },
         skip_sid=True)
 

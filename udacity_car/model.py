@@ -6,7 +6,7 @@ class CnnNet(nn.Module):
     def __init__(self):
         super(CnnNet, self).__init__()
         self.layer1 = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=5, padding=2),
+            nn.Conv2d(9, 16, kernel_size=5, padding=2),
             nn.BatchNorm2d(16),
             nn.ReLU(),
             nn.MaxPool2d(2))
